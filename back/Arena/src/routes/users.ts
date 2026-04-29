@@ -7,28 +7,31 @@ export type User = {
   gameName: string;
   tagLine: string;
   riotId: string;
+  lastUpdatedTime: string;
 };
 
-const listUsersRiotId = ["dolu13#BATON","PisseMystique#KKdu6"] //TODO input
+const listUsersRiotId = ["dolu13#BATON","PisseMystique#KKdu6","LeSPQR844#EUWET","strylax#EUW","Oneezuka#EUW"] //TODO input
 
 const route = new Hono();
 
-// route.get("/", (c) => {
-//   return c.json(getUsers());
-// });
+//Simply return all the User already in the DB
+route.get("/", (c) => {
+  return c.json(getUsers());
+});
 
-route.get("/", async (c) => {
+//Retrieve User by UserId in listUsersRiotId then add to DB
+route.get("/InsertAllUsers", async (c) => {
     const allUsers: User[] = getUsers()
     const allUsersRiotId: String[] = allUsers.map(u => u.riotId);
 
     const usersToCreate: String[] = listUsersRiotId.filter(x => !allUsersRiotId.includes(x));
     console.log('usersToCreate',usersToCreate)
 
-    usersToCreate.forEach(element => {
+    for (const element of usersToCreate) {
       let splitRiotId = element.split('#')
-      return c.json(getAccountByRiotId(splitRiotId[0],splitRiotId[1]));
-    });
-
+      await getAccountByRiotId(splitRiotId[0],splitRiotId[1])
+    }
+    return c.json({message: 'User have been created with success'});
 });
 
 export default route;
